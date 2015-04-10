@@ -30,10 +30,13 @@ app:
     DATABASE_URL: postgres://openproject:openproject@db:5432/openproject
     SECRET_TOKEN: foobar
     SESSION_STORE: active_record_store
+    SETTINGS_EMAIL_SMTP_ADDRESS: mailcatcher
+    SETTINGS_EMAIL_SMTP_PORT: 1025
   ports:
     - "3000:3000"
   links:
     - db
+    - mailcatcher
   volumes:
     - /usr/src/openproject/public
 
@@ -46,6 +49,7 @@ worker:
     SECRET_TOKEN: foobar
   links:
     - db
+    - mailcatcher
 
 db:
   image: postgres:9.4
@@ -59,3 +63,8 @@ data:
   image: busybox:latest
   volumes:
     - /var/lib/postgresql/data
+
+mailcatcher:
+  image: schickling/mailcatcher:latest
+  ports:
+    - "1080:1080"
