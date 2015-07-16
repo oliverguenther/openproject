@@ -204,7 +204,7 @@ RAW
 
     repository = FactoryGirl.create :repository_subversion,
                                     project: @project
-                                    
+
     changeset = FactoryGirl.create :changeset,
                                    repository: repository,
                                    comments: 'This commit fixes #1, #2 and references #1 & #3'

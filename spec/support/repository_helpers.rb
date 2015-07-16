@@ -56,9 +56,8 @@ def with_created_subversion_repository(&block)
   let(:repository) { FactoryGirl.create(:repository_subversion) }
 
   before do
-    allow(Setting).to receive(:enabled_scm).and_return(["Subversion"])
+    allow(Setting).to receive(:enabled_scm).and_return(['Subversion'])
   end
 
   block.call
 end
-

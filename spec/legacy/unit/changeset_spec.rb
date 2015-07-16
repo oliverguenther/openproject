@@ -239,7 +239,8 @@ describe Changeset, type: :model do
   it 'should comments nil' do
     with_settings enabled_scm: ['Subversion'] do
       proj = Project.find(3)
-      r = FactoryGirl.create(:repository_subversion)
+      r = FactoryGirl.create(:repository_subversion,
+                             project: proj)
       assert r
 
       c = Changeset.new(repository: r,

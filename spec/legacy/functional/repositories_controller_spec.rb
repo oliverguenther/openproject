@@ -69,18 +69,32 @@ describe RepositoriesController, type: :controller do
       get :revision, project_id: 1, rev: 1
       assert_response :success
       assert_template 'revision'
-      assert_no_tag tag: 'ul', attributes: { id: 'toolbar-items' },
-                    descendant: { tag: 'a', attributes: { href: @controller.url_for(only_path: true,
-                                                                               controller: 'repositories',
-                                                                               action: 'revision',
-                                                                               project_id: 'ecookbook',
-                                                                               rev: '0') } }
-      assert_tag tag: 'ul', attributes: { id: 'toolbar-items' },
-                 descendant: { tag: 'a', attributes: { href: @controller.url_for(only_path: true,
-                                                                            controller: 'repositories',
-                                                                            action: 'revision',
-                                                                            project_id: 'ecookbook',
-                                                                            rev: '2') } }
+      assert_no_tag tag: 'ul',
+                    attributes: { id: 'toolbar-items' },
+                    descendant: { tag: 'a',
+                                  attributes: {
+                                    href: @controller.url_for(
+                                      only_path: true,
+                                      controller: 'repositories',
+                                      action: 'revision',
+                                      project_id: 'ecookbook',
+                                      rev: '0'
+                                    )
+                                  }
+                                }
+      assert_tag tag: 'ul',
+                 attributes: { id: 'toolbar-items' },
+                 descendant: { tag: 'a',
+                               attributes: {
+                                 href: @controller.url_for(
+                                   only_path: true,
+                                   controller: 'repositories',
+                                   action: 'revision',
+                                   project_id: 'ecookbook',
+                                   rev: '2'
+                                 )
+                               }
+                             }
     end
 
     it 'should graph commits per month' do
@@ -98,23 +112,35 @@ describe RepositoriesController, type: :controller do
         committed_on: Time.now,
         revision: 100,
         comments: 'Committed by foo.'
-       )
+      )
 
       get :committers, project_id: 1
       assert_response :success
       assert_template 'committers'
 
-      assert_tag :td, content: 'dlopper',
-                      sibling: { tag: 'td',
-                                 child: { tag: 'select', attributes: { name: %r{^committers\[\d+\]\[\]$} },
-                                          child: { tag: 'option', content: 'Dave Lopper',
-                                                   attributes: { value: '3', selected: 'selected' } } } }
-      assert_tag :td, content: 'foo',
-                      sibling: { tag: 'td',
-                                 child: { tag: 'select', attributes: { name: %r{^committers\[\d+\]\[\]$} } } }
-      assert_no_tag :td, content: 'foo',
-                         sibling: { tag: 'td',
-                                    descendant: { tag: 'option', attributes: { selected: 'selected' } } }
+      assert_tag :td,
+                 content: 'dlopper',
+                 sibling: {
+                   tag: 'td',
+                   child: { tag: 'select', attributes: { name: %r{^committers\[\d+\]\[\]$ } },
+                            child: { tag: 'option', content: 'Dave Lopper',
+                                     attributes: { value: '3', selected: 'selected' } }
+                          }
+                 }
+      assert_tag :td,
+                 content: 'foo',
+                 sibling: {
+                   tag: 'td',
+                   child: { tag: 'select',
+                            attributes: { name: %r{^committers\[\d+\]\[\]$} }
+                          }
+                 }
+      assert_no_tag :td,
+                    content: 'foo',
+                    sibling: {
+                      tag: 'td',
+                      descendant: { tag: 'option', attributes: { selected: 'selected' } }
+                    }
     end
 
     it 'should map committers' do
@@ -126,9 +152,10 @@ describe RepositoriesController, type: :controller do
         committed_on: Time.now,
         revision: 100,
         comments: 'Committed by foo.'
-            )
+      )
       assert_no_difference "Changeset.count(:conditions => 'user_id = 3')" do
-        post :committers, project_id: 1, committers: { '0' => ['foo', '2'], '1' => ['dlopper', '3'] }
+        post :committers, project_id: 1,
+                          committers: { '0' => ['foo', '2'], '1' => ['dlopper', '3'] }
         assert_redirected_to '/projects/ecookbook/repository/committers'
         assert_equal User.find(2), c.reload.user
       end
