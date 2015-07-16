@@ -50,12 +50,6 @@ See doc/COPYRIGHT.rdoc for more details.
   <% end %>
   <% if User.current.allowed_to?(:manage_repository, @project) %>
     <li class="toolbar-item">
-      <%= link_to committers_project_repository_path(@project), class: 'button' do %>
-        <i class="button--icon icon-user1"></i>
-        <span class="button--text"><%= l(:label_user_plural) %></span>
-      <% end %>
-    </li>
-    <li class="toolbar-item">
       <%= link_to settings_project_path(@project, tab: 'repository') , class: 'button' do %>
         <i class="button--icon icon-settings"></i>
         <span class="button--text"><%= l(:label_settings) %></span>

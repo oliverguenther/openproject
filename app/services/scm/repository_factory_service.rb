@@ -68,8 +68,8 @@ Scm::RepositoryFactoryService = Struct.new :project, :params do
 
   private
 
-  def build_guarded(&block)
-    @repository = block.call
+  def build_guarded
+    @repository = yield
     @repository.present?
   rescue Repository::BuildFailed => e
     @build_failed_msg = e.message
