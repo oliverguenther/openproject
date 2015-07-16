@@ -26,26 +26,39 @@
 #
 # See doc/COPYRIGHT.rdoc for more details.
 #++
+def with_filesystem_repository(vendor, command = nil, &block)
+  repo_dir = File.join(Rails.root, 'tmp', 'test', "#{vendor}_repository")
+  fixture = File.join(Rails.root, "spec/fixtures/repositories/#{vendor}_repository.tar.gz")
 
-def with_created_filesystem_repository(&block)
-  let(:repository) do
-    repo = FactoryGirl.build(:repository)
-
-    # ignoring the bugs on url as those are expected:
-    # 1) directory is not existing
-    # 2) configuration is not whitelisting the directory
-    if repo.valid? || (repo.errors.keys - [:url]).empty?
-      repo.save(validate: false)
-    else
-      repo.save!
+  before(:all) do
+    ['tar', command].compact.each do |cmd|
+      begin
+        # Avoid `which`, as it's not POSIX
+        Open3.capture2e(cmd, '--version')
+      rescue Errno::ENOENT
+        skip "#{cmd} was not found in PATH. Skipping local repository specs"
+      end
     end
 
-    repo
+    # Create repository
+    FileUtils.mkdir_p repo_dir
+    system "tar -xzf #{fixture} -C #{repo_dir}"
   end
 
+  after(:all) do
+    FileUtils.remove_dir repo_dir
+  end
+
+  block.call(repo_dir)
+end
+
+def with_created_subversion_repository(&block)
+  let(:repository) { FactoryGirl.create(:repository_subversion) }
+
   before do
-    allow(Setting).to receive(:enabled_scm).and_return(["Filesystem"])
+    allow(Setting).to receive(:enabled_scm).and_return(["Subversion"])
   end
 
   block.call
 end
+
