@@ -99,7 +99,7 @@ user_count.times do |count|
   puts
   print "...for user number #{count + 1}/#{user_count} (#{login})"
 
-  user = User.find_by_login(login)
+  user = User.find_by(login: login)
 
   unless user
     user = User.new
