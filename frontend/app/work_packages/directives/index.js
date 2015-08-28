@@ -96,6 +96,7 @@ angular.module('openproject.workPackages.directives')
     require('./work-packages-table-directive')
   ])
   .directive('workPackageAttachments', [
+    '$window',
     'WorkPackageAttachmentsService',
     'NotificationsService',
     'I18n',

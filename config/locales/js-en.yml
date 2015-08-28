@@ -332,6 +332,8 @@ en:
       label_column_select: "Status - Combined dropdown field: Selection with auto-completion."
       message_error_during_bulk_delete: An error occurred while trying to delete work packages.
       message_successful_bulk_delete: Successfully deleted work packages.
+      attachments:
+        delete_dialog: "Are you sure you want to delete the selected attachment?"
       create:
         header: 'New Work Package'
       no_results:

@@ -27,6 +27,7 @@
 //++
 
 module.exports = function(
+  $window,
   workPackageAttachmentsService,
   NotificationsService,
   I18n,
@@ -75,6 +76,11 @@ module.exports = function(
 
     var currentlyRemoving = [];
     scope.remove = function(file) {
+
+      if (!$window.confirm(I18n.t('js.work_packages.attachments.delete_dialog'))) {
+        return;
+      }
+
       currentlyRemoving.push(file);
       workPackageAttachmentsService.remove(file).then(function(file) {
         _.remove(scope.attachments, file);
