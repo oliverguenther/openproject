@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 See doc/COPYRIGHT.rdoc for more details.
 
 ++#%>
-<form class="form -bordered -danger-zone">
+<%= styled_form_tag(project_path(@project_to_destroy),
+                    class: '-bordered -danger-zone',
+                    method: :delete) do %>
   <section class="form--section">
     <h3 class="form--section-title">
       <%= l(:text_project_destroy_title) %>
@@ -39,6 +41,9 @@ See doc/COPYRIGHT.rdoc for more details.
         <%= l(:text_subprojects_destroy_warning, content_tag('strong', descendants.html_safe)) %>
       <% end %>
     </p>
+    <p>
+      <label><%= check_box_tag 'confirm', 1 %> <%= l(:general_text_Yes) %></label>
+    </p>
     <div>
       <%= submit_tag l(:button_delete), class: 'button -highlight', title: l(:button_delete) %>
       <%= link_to admin_projects_path,
@@ -48,4 +53,4 @@ See doc/COPYRIGHT.rdoc for more details.
       <% end %>
     </div>
   </section>
-</form>
+<% end %>
