@@ -30,6 +30,8 @@
 module.exports = function(
   HALAPIResource,
   $http,
+  $q,
+  $filter,
   I18n,
   NotificationsService
   ) {
@@ -57,6 +59,45 @@ module.exports = function(
           I18n.t('js.work_packages.comment_updated')
         );
         return activity;
+      });
+    },
+
+    // Handle asynchronous loading and interlacing of activities.
+    // Does not add any intermittent result to the scope,
+    // as we will get an inconsistent activity view.
+    // As we may not what activities will be added at a given time,
+    // let them be aggregated asynchronously.
+    getAggregatedActivities: function(workPackage, sortedInDescendingOrder) {
+      function addDisplayedActivities() {
+        return $q(function(resolve) {
+          var activities = workPackage.embedded.activities.embedded.elements;
+          resolve(activities);
+        });
+      }
+
+      function addDisplayedRevisions() {
+        return $q(function(resolve) {
+          var linkedRevisions = workPackage.links.revisions;
+
+          if (linkedRevisions === undefined) {
+            resolve();
+          }
+
+          linkedRevisions
+            .fetch()
+            .then(function(data) {
+              resolve(data.embedded.elements)
+            });
+        });
+      }
+
+      return $q(function(resolve) {
+        $q.all([addDisplayedActivities(), addDisplayedRevisions()]).then(function(aggregated) {
+          resolve($filter('orderBy')(_.flatten(aggregated),
+            'props.createdAt',
+            sortedInDescendingOrder
+          ));
+        });
       });
     },
 

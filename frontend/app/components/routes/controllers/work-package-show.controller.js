@@ -145,51 +145,6 @@ function WorkPackageShowController($scope, $rootScope, $state, latestTab, workPa
   $scope.outputMessage = outputMessage; // expose to child controllers
   $scope.outputError = outputError; // expose to child controllers
 
-  function aggregateActivities(workPackage) {
-    // Do not yet add any intermittent result to the scope,
-    // as we will get an inconsistent activity view
-    // As we may not what activities will be added at a given time,
-    // let them be aggregated asynchronously.
-    var aggregated = [],
-      totalActivities = 0;
-
-    var aggregate = function(success, activity) {
-
-      if (success === true) {
-        aggregated = aggregated.concat(activity);
-      }
-
-      if (++totalActivities === 2) {
-        $scope.activities = $filter('orderBy')(aggregated,
-          'props.createdAt',
-          $scope.activitiesSortedInDescendingOrder
-        );
-      }
-    };
-
-    addDisplayedActivities(workPackage, aggregate);
-    addDisplayedRevisions(workPackage, aggregate);
-  }
-
-  function addDisplayedActivities(workPackage, aggregate) {
-    var activities = workPackage.embedded.activities.embedded.elements;
-    aggregate(true, activities);
-  }
-
-  function addDisplayedRevisions(workPackage, aggregate) {
-    var linkedRevisions = workPackage.links.revisions;
-
-    if (linkedRevisions === undefined) {
-      return aggregate();
-    }
-
-    linkedRevisions
-      .fetch()
-      .then(function(data) {
-        aggregate(true, data.embedded.elements);
-      }, aggregate);
-  }
-
   function setWorkPackageScopeProperties(workPackage){
     $scope.workPackage = workPackage;
     $scope.isWatched = workPackage.links.hasOwnProperty('unwatch');
@@ -203,7 +158,10 @@ function WorkPackageShowController($scope, $rootScope, $state, latestTab, workPa
     // activities and latest activities
     $scope.activitiesSortedInDescendingOrder = ConfigurationService.commentsSortedInDescendingOrder();
     $scope.activities = [];
-    aggregateActivities($scope.workPackage);
+    ActivityService.getAggregatedActivities($scope.workPackage, $scope.activitiesSortedInDescendingOrder)
+      .then(function(aggregated) {
+      $scope.activities = aggregated;
+    });
 
     // watchers
     if(workPackage.links.watchers) {

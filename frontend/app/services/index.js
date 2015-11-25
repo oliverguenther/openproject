@@ -30,6 +30,8 @@ angular.module('openproject.services')
   .service('ActivityService', [
     'HALAPIResource',
     '$http',
+    '$q',
+    '$filter',
     'I18n',
     'NotificationsService',
     require('./activity-service')
