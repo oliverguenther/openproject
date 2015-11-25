@@ -70,8 +70,9 @@ module.exports = function(
     getAggregatedActivities: function(workPackage, sortedInDescendingOrder) {
       function addDisplayedActivities() {
         return $q(function(resolve) {
-          var activities = workPackage.embedded.activities.embedded.elements;
-          resolve(activities);
+          workPackage.links.activities.fetch().then(function(data) {
+            resolve(data.embedded.elements);
+          });
         });
       }
 
