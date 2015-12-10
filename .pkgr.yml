@@ -1,6 +1,13 @@
 user: openproject
 group: openproject
 targets:
+  sles-11:
+    env:
+      - EMBED_IMAGEMAGICK=true
+  debian-7: &debian
+    build_dependencies:
+      - libmagickwand-dev
+      - libsqlite3-dev
   debian-8:
     <<: *debian
   ubuntu-14.04:
