@@ -33,9 +33,9 @@ installer: https://github.com/pkgr/installer.git
 wizards:
   - https://github.com/pkgr/addon-legacy-installer.git
   - https://github.com/pkgr/addon-mysql.git
-  - https://github.com/pkgr/addon-apache2.git
-  - https://github.com/finnlabs/addon-repositories.git
+  - https://github.com/oliverguenther/addon-apache2.git#feature/relative_root
+  - https://github.com/finnlabs/addon-repositories.git#feature/relative_root
   - https://github.com/pkgr/addon-smtp.git
   - https://github.com/pkgr/addon-memcached.git
-  - https://github.com/pkgr/addon-openproject.git
+  - https://github.com/oliverguenther/addon-openproject.git#feature/consolidate_postinstall
 buildpack: https://github.com/ddollar/heroku-buildpack-multi.git
