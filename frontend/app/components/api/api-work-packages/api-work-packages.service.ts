@@ -36,14 +36,13 @@ export class ApiWorkPackagesService {
                protected $stateParams,
                protected $q:ng.IQService,
                protected apiV3:restangular.IService,
-               protected apiMetaData:ApiMetaDataService,
-               protected apiParamMapping:ApiParamMappingService) {
+               protected apiMetaData:ApiMetaDataService) {
 
     this.WorkPackages = apiV3.service('work_packages');
   }
 
   public list(offset:number, pageSize:number, query:api.ex.Query, columns:api.ex.Column[]) {
-    const columns = apiParamMapping.transformV3(columns);
+    const columns = ApiParamMappingService.columnListToV3(columns);
     const columnNames = columns.map(column => column.name);
 
     return this.WorkPackages.getList(this.queryAsV3Params(offset, pageSize, query)).then(wpCollection => {
