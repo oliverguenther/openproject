@@ -27,27 +27,23 @@
 //++
 
 import {ApiMetaDataService} from "../api-meta-data/api-meta-data.service";
+import {ApiParamMappingService} from "../api-experimental/api-param-mapping.service";
 
 export class ApiWorkPackagesService {
   protected WorkPackages;
-
-  //TODO: Add missing properties.
-  protected propertyMap = {
-    assigned_to: 'assignee',
-    updated_at: 'updatedAt'
-  };
 
   constructor (protected DEFAULT_PAGINATION_OPTIONS,
                protected $stateParams,
                protected $q:ng.IQService,
                protected apiV3:restangular.IService,
-               protected apiMetaData:ApiMetaDataService) {
+               protected apiMetaData:ApiMetaDataService,
+               protected apiParamMapping:ApiParamMappingService) {
 
     this.WorkPackages = apiV3.service('work_packages');
   }
 
   public list(offset:number, pageSize:number, query:api.ex.Query, columns:api.ex.Column[]) {
-    const columns = this.mapColumns(columns);
+    const columns = apiParamMapping.transformV3(columns);
     const columnNames = columns.map(column => column.name);
 
     return this.WorkPackages.getList(this.queryAsV3Params(offset, pageSize, query)).then(wpCollection => {
@@ -57,11 +53,6 @@ export class ApiWorkPackagesService {
 
       return wpCollection;
     });
-  }
-
-  protected mapColumns(columns:api.ex.Column[] = []) {
-    columns.forEach(column => column.name = this.propertyMap[column.name] || column.name);
-    return columns;
   }
 
   protected queryAsV3Params(offset:number, pageSize:number, query:api.ex.Query) {
