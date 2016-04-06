@@ -159,14 +159,15 @@
             </td>
         </tr>
 
+      </tbody>
+      <tfoot>
         <!-- Inline create button -->
         <tr wp-inline-create
             id="wp-inline-create-button"
             rows="rows"
-            columns="columns">
+            columns="columns"
+            ng-class="sumsLoaded() ? '-two-rows' : '' ">
         </tr>
-      </tbody>
-      <tfoot>
 
         <!-- Total sums -->
 
@@ -185,11 +186,10 @@
             </wp-td>
           </td>
         </tr>
-
       </tfoot>
     </table>
     <div class="generic-table--header-background"></div>
-    <div class="generic-table--footer-background" ng-if="sumsLoaded()"></div>
+    <div class="generic-table--footer-background" ng-class="sumsLoaded() ? '-two-rows' : '' "></div>
   </div>
   <div class="generic-table--no-results-container" ng-if="!rows.length">
     <i class="icon-info1"></i>
