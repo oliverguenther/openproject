@@ -104,6 +104,8 @@ module OpenProject
         replace_toc(text, @parsed_headings)
       end
 
+      ## Replace any remaining curly braces
+      text.gsub!('{{', '{{ DOUBLE_LEFT_CURLY_BRACE }}')
       text.html_safe
     end
     deprecated_alias :textilizable, :format_text
