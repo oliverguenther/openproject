@@ -177,7 +177,7 @@ function wpTable(
       function openWhenInSplitView(workPackage) {
         if ($state.includes('work-packages.list.details')) {
           $state.go(
-            $state.$current.name,
+            scope.desiredSplitViewState,
             { workPackageId: workPackage.id }
           );
         }
