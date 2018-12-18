@@ -113,6 +113,7 @@
 <li><span class="icon icon-hosting"></span>hosting</li>
 <li><span class="icon icon-image1"></span>image1</li>
 <li><span class="icon icon-image2"></span>image2</li>
+<li><span class="icon icon-import"></span>import</li>
 <li><span class="icon icon-info1"></span>info1</li>
 <li><span class="icon icon-info2"></span>info2</li>
 <li><span class="icon icon-installation-services"></span>installation-services</li>
@@ -231,7 +232,6 @@
 <li><span class="icon icon-view-fullscreen"></span>view-fullscreen</li>
 <li><span class="icon icon-view-list"></span>view-list</li>
 <li><span class="icon icon-view-split"></span>view-split</li>
-<li><span class="icon icon-view-timeline"></span>view-timeline</li>
 <li><span class="icon icon-warning"></span>warning</li>
 <li><span class="icon icon-watched"></span>watched</li>
 <li><span class="icon icon-wiki-edit"></span>wiki-edit</li>

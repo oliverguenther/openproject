@@ -98,6 +98,13 @@ PATH
       openproject-pdf_export (= 8.2.0)
 
 PATH
+  remote: modules/bim
+  specs:
+    openproject-bim (8.2.0)
+      rails (~> 5)
+      rubyzip (~> 1.2)
+
+PATH
   remote: modules/costs
   specs:
     openproject-costs (8.2.0)
@@ -886,6 +893,7 @@ DEPENDENCIES
   openproject-auth_plugins!
   openproject-avatars!
   openproject-backlogs!
+  openproject-bim!
   openproject-costs!
   openproject-documents!
   openproject-github_integration!
