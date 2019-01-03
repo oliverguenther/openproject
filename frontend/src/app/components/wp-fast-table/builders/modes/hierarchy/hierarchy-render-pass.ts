@@ -9,11 +9,11 @@ import {
   hierarchyRootClass
 } from '../../../helpers/wp-table-hierarchy-helpers';
 import {WorkPackageTable} from '../../../wp-fast-table';
-import {WorkPackageTableHierarchies} from '../../../wp-table-hierarchies';
 import {WorkPackageTableRow} from '../../../wp-table.interfaces';
 import {PrimaryRenderPass, RowRenderInfo} from '../../primary-render-pass';
 import {additionalHierarchyRowClassName, SingleHierarchyRowBuilder} from './single-hierarchy-row-builder';
 import {WorkPackageResource} from 'core-app/modules/hal/resources/work-package-resource';
+import {WorkPackageTableHierarchies} from 'core-components/wp-fast-table/state/wp-table-hierarchy.interface';
 
 export class HierarchyRenderPass extends PrimaryRenderPass {
 

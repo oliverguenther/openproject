@@ -3,6 +3,6 @@
     <query-filters *ngIf="!!filters"
                    [filters]="filters"
                    [showCloseFilter]="true"
-                   (filtersChanged)="replaceIfComplete($event)"></query-filters>
+                   (filtersChanged)="updateIfComplete($event)"></query-filters>
   </div>
 </div>

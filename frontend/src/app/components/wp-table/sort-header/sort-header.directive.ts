@@ -101,7 +101,7 @@ export class SortHeaderDirective implements OnDestroy, AfterViewInit {
         takeUntil(componentDestroyed(this))
       )
       .subscribe(() => {
-        let latestSortElement = this.wpTableSortBy.currentSortBys[0];
+        let latestSortElement = this.wpTableSortBy.current[0];
 
         if (!latestSortElement || this.headerColumn.$href !== latestSortElement.column.$href) {
           this.currentSortDirection = null;
@@ -109,8 +109,6 @@ export class SortHeaderDirective implements OnDestroy, AfterViewInit {
           this.currentSortDirection = latestSortElement.direction;
         }
         this.setActiveColumnClass();
-
-        this.setFullTitleAndSummary();
 
         this.sortable = this.wpTableSortBy.isSortable(this.headerColumn);
 
@@ -188,23 +186,6 @@ export class SortHeaderDirective implements OnDestroy, AfterViewInit {
       this.text.toggleHierarchy = I18n.t('js.work_packages.hierarchy.show');
       this.hierarchyIcon = 'icon-no-hierarchy';
     }
-  }
-
-  setFullTitleAndSummary() {
-    // TODO
-    // RR: disabled due to Angular2 migration
-    //this.fullTitle = this.headerTitle;
-
-    // if (this.currentSortDirection) {
-    //   var ascending = this.currentSortDirection.$href === QUERY_SORT_BY_ASC;
-    //   var summaryContent = [
-    //     ascending ? I18n.t('js.label_ascending') : I18n.t('js.label_descending'),
-    //     I18n.t('js.label_sorted_by'),
-    //     this.headerTitle + '.'
-    //   ];
-    //
-    //   jQuery('#wp-table-sort-summary').text(summaryContent.join(' '));
-    // }
   }
 
   private getDirectionClass():string {

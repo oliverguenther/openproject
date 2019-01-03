@@ -1,7 +1,6 @@
 import {Injector} from '@angular/core';
 import {WorkPackageResource} from 'core-app/modules/hal/resources/work-package-resource';
 import {States} from '../../../../states.service';
-import {WorkPackageChangeset} from '../../../../wp-edit-form/work-package-changeset';
 import {collapsedGroupClass, hasChildrenInTable} from '../../../helpers/wp-table-hierarchy-helpers';
 import {WorkPackageTableHierarchiesService} from '../../../state/wp-table-hierarchy.service';
 import {WorkPackageTable} from '../../../wp-fast-table';
@@ -54,7 +53,7 @@ export class SingleHierarchyRowBuilder extends SingleRowBuilder {
    */
   public buildEmpty(workPackage:WorkPackageResource):[HTMLElement, boolean] {
     let [element, hidden] = super.buildEmpty(workPackage);
-    const state = this.wpTableHierarchies.currentState;
+    const state = this.wpTableHierarchies.current;
 
     workPackage.ancestors.forEach((ancestor:WorkPackageResource) => {
       element.classList.add(`__hierarchy-group-${ancestor.id}`);

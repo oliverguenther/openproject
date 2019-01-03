@@ -1,22 +1,35 @@
 import {QueryResource} from 'core-app/modules/hal/resources/query-resource';
 import {InputState} from 'reactivestates';
-import {WorkPackageQueryStateService, WorkPackageTableBaseService} from './wp-table-base.service';
-import {WorkPackageTableHierarchies} from '../wp-table-hierarchies';
 import {TableState} from 'core-components/wp-table/table-state/table-state';
 import {Injectable} from '@angular/core';
+import {
+  WorkPackageQueryStateService,
+  WorkPackageTableBaseService
+} from 'core-components/wp-fast-table/state/wp-table-base.service';
+import {WorkPackageTableHierarchies} from 'core-components/wp-fast-table/state/wp-table-hierarchy.interface';
 
 @Injectable()
-export class WorkPackageTableHierarchiesService extends WorkPackageTableBaseService<WorkPackageTableHierarchies> implements WorkPackageQueryStateService {
+export class WorkPackageTableHierarchiesService
+  extends WorkPackageTableBaseService<WorkPackageTableHierarchies>
+  implements WorkPackageQueryStateService {
   public constructor(tableState:TableState) {
     super(tableState);
   }
 
-  public get state():InputState<WorkPackageTableHierarchies> {
-    return this.tableState.hierarchies;
+  protected get inputState():InputState<WorkPackageTableHierarchies> {
+    return this.tableState.hierarchies as InputState<WorkPackageTableHierarchies>;
   }
 
-  public valueFromQuery(query:QueryResource):WorkPackageTableHierarchies|undefined {
-    return new WorkPackageTableHierarchies(query.showHierarchies);
+  protected initialState(visible:boolean) {
+    return {
+      visible: visible,
+      last: null,
+      collapsed: {}
+    };
+  }
+
+  public valueFromQuery(query:QueryResource):WorkPackageTableHierarchies {
+    return this.initialState(query.showHierarchies);
   }
 
   public hasChanged(query:QueryResource) {
@@ -34,27 +47,27 @@ export class WorkPackageTableHierarchiesService extends WorkPackageTableBaseServ
    * Return whether the current hierarchy mode is active
    */
   public get isEnabled():boolean {
-    return this.currentState.isEnabled;
+    return this.current.visible;
+  }
+
+  public get current():WorkPackageTableHierarchies {
+    return this.state.getValueOr(this.initialState(false));
   }
 
   public setEnabled(active:boolean = true) {
-    const state = this.currentState;
-    state.current = active;
+    const state = this.current;
+    state.visible = active;
     state.last = null;
 
     if (active) {
       // hierarchies and group by are mutually exclusive
-      var groupBy = this.tableState.groupBy.value!;
-      groupBy.current = undefined;
-      this.tableState.groupBy.putValue(groupBy);
+      var groupBy = this.tableState.groupBy.putValue(undefined);
 
       // hierarchies and sort by are mutually exclusive
-      var sortBy = this.tableState.sortBy.value!;
-      sortBy.current = [];
-      this.tableState.sortBy.putValue(sortBy);
+      this.tableState.sortBy.putValue([]);
     }
 
-    this.state.putValue(state);
+    this.update(state);
   }
 
   /**
@@ -68,7 +81,7 @@ export class WorkPackageTableHierarchiesService extends WorkPackageTableBaseServ
    * Return whether the given wp ID is collapsed.
    */
   public collapsed(wpId:string):boolean {
-    return this.currentState.collapsed[wpId];
+    return this.current.collapsed[wpId];
   }
 
   /**
@@ -96,26 +109,10 @@ export class WorkPackageTableHierarchiesService extends WorkPackageTableBaseServ
    * Set the collapse/expand state of the given work package id.
    */
   private setState(wpId:string, isCollapsed:boolean):void {
-    const state = this.currentState;
-    state.collapsed[wpId] = isCollapsed;
-    state.last = wpId;
-    this.state.putValue(state);
-  }
-
-  /**
-   * Get current selection state.
-   */
-  public get currentState():WorkPackageTableHierarchies {
-    const state = this.state.value;
-
-    if (state === undefined) {
-      return this.initialState;
-    }
-
-    return state;
-  }
-
-  private get initialState():WorkPackageTableHierarchies {
-    return new WorkPackageTableHierarchies(false);
+    this.inputState.doModify(state => {
+      let newState = { ...state, last: wpId };
+      newState.collapsed[wpId] = isCollapsed;
+      return newState;
+    });
   }
 }

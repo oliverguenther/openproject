@@ -26,16 +26,15 @@
 // See doc/COPYRIGHT.rdoc for more details.
 //++
 
-import {WorkPackageTableFiltersService} from '../../wp-fast-table/state/wp-table-filters.service';
 import {WorkPackageFiltersService} from "../../filters/wp-filters/wp-filters.service";
-import {Component, Inject, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
 import {QueryFilterInstanceResource} from 'core-app/modules/hal/resources/query-filter-instance-resource';
 import {I18nService} from 'core-app/modules/common/i18n/i18n.service';
 import {componentDestroyed} from 'ng2-rx-componentdestroyed';
-import {WorkPackageTableFilters} from 'core-components/wp-fast-table/wp-table-filters';
-import {QueryFilterResource} from  'core-app/modules/hal/resources/query-filter-resource';
+import {QueryFilterResource} from 'core-app/modules/hal/resources/query-filter-resource';
 import {DebouncedEventEmitter} from 'core-components/angular/debounced-event-emitter';
 import {AngularTrackingHelpers} from "core-components/angular/tracking-functions";
+import {WorkPackageTableFiltersService} from 'core-components/wp-fast-table/state/wp-table-filters.service';
 
 const ADD_FILTER_SELECT_INDEX = -1;
 
@@ -46,10 +45,9 @@ const ADD_FILTER_SELECT_INDEX = -1;
 })
 export class QueryFiltersComponent implements OnInit, OnChanges, OnDestroy {
 
-  @Input() public filters:WorkPackageTableFilters;
+  @Input() public filters:QueryFilterInstanceResource[];
   @Input() public showCloseFilter:boolean = false;
-  @Output() public filtersChanged = new DebouncedEventEmitter<WorkPackageTableFilters>(componentDestroyed(this));
-
+  @Output() public filtersChanged = new DebouncedEventEmitter<QueryFilterInstanceResource[]>(componentDestroyed(this));
 
   public filterToBeAdded:QueryFilterResource|undefined;
   public remainingFilters:any[] = [];
@@ -69,8 +67,8 @@ export class QueryFiltersComponent implements OnInit, OnChanges, OnDestroy {
     please_select: this.I18n.t('js.placeholders.selection')
   };
 
-  constructor(readonly wpTableFilters:WorkPackageTableFiltersService,
-              readonly wpFiltersService:WorkPackageFiltersService,
+  constructor(readonly wpFiltersService:WorkPackageFiltersService,
+              readonly wpTableFiltersService:WorkPackageTableFiltersService,
               readonly I18n:I18nService) {
   }
 
@@ -88,7 +86,8 @@ export class QueryFiltersComponent implements OnInit, OnChanges, OnDestroy {
 
   public onFilterAdded(filterToBeAdded:QueryFilterResource) {
     if (filterToBeAdded) {
-      let newFilter = this.filters.add(filterToBeAdded);
+      this.wpTableFiltersService.add(filterToBeAdded);
+
       this.filterToBeAdded = undefined;
 
       const index = this.currentFilterLength();
@@ -104,13 +103,13 @@ export class QueryFiltersComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public isHiddenFilter(filter:QueryFilterResource) {
-    return _.includes(this.filters.hidden, filter.id);
+    return _.includes(this.wpTableFiltersService.hidden, filter.id);
   }
 
   public deactivateFilter(removedFilter:QueryFilterInstanceResource) {
-    let index = this.filters.current.indexOf(removedFilter);
+    let index = this.filters.indexOf(removedFilter);
 
-    this.filters.remove(removedFilter);
+    this.wpTableFiltersService.remove(removedFilter);
     if (removedFilter.isCompletelyDefined()) {
       this.filtersChanged.emit(this.filters);
     }
@@ -120,7 +119,7 @@ export class QueryFiltersComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private updateRemainingFilters() {
-    this.remainingFilters = _.sortBy(this.filters.remainingVisibleFilters, 'name');
+    this.remainingFilters = _.sortBy(this.wpTableFiltersService.remainingVisibleFilters, 'name');
   }
 
   private updateFilterFocus(index:number) {
@@ -131,16 +130,16 @@ export class QueryFiltersComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       const filterIndex = (index < activeFilterCount) ? index : activeFilterCount - 1;
       const filter = this.currentFilterAt(filterIndex);
-      this.focusElementIndex = this.filters.current.indexOf(filter);
+      this.focusElementIndex = this.filters.indexOf(filter);
     }
   }
 
   public currentFilterLength() {
-    return this.filters.current.length;
+    return this.filters.length;
   }
 
   public currentFilterAt(index:number) {
-    return this.filters.current[index];
+    return this.filters[index];
   }
 
 }

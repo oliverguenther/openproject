@@ -1,8 +1,4 @@
 import {RenderedRow} from 'app/components/wp-fast-table/builders/primary-render-pass';
-import {WorkPackageTableColumns} from 'app/components/wp-fast-table/wp-table-columns';
-import {WorkPackageTableFilters} from 'app/components/wp-fast-table/wp-table-filters';
-import {WorkPackageTableGroupBy} from 'app/components/wp-fast-table/wp-table-group-by';
-import {WorkPackageTableHierarchies} from 'app/components/wp-fast-table/wp-table-hierarchies';
 import {WorkPackageTablePagination} from 'app/components/wp-fast-table/wp-table-pagination';
 import {WorkPackageTableRelationColumns} from 'app/components/wp-fast-table/wp-table-relation-columns';
 import {WorkPackageTableSortBy} from 'app/components/wp-fast-table/wp-table-sort-by';
@@ -20,9 +16,13 @@ import {
   WorkPackageCollectionResource
 } from 'core-app/modules/hal/resources/wp-collection-resource';
 import {WorkPackageResource} from 'core-app/modules/hal/resources/work-package-resource';
-import {HighlightingMode} from "core-components/wp-fast-table/builders/highlighting/highlighting-mode.const";
 import {WorkPackageTableHighlight} from "core-components/wp-fast-table/wp-table-highlight";
 import {QueryFormResource} from "core-app/modules/hal/resources/query-form-resource";
+import {QueryFilterInstanceResource} from 'core-app/modules/hal/resources/query-filter-instance-resource';
+import {QueryColumn} from 'core-components/wp-query/query-column';
+import {WorkPackageTableHierarchies} from 'core-components/wp-fast-table/state/wp-table-hierarchy.interface';
+import {QuerySortByResource} from 'core-app/modules/hal/resources/query-sort-by-resource';
+import {QueryGroupByResource} from 'core-app/modules/hal/resources/query-group-by-resource';
 
 @Injectable()
 export class TableState extends StatesGroup {
@@ -46,16 +46,16 @@ export class TableState extends StatesGroup {
   // all groups returned as results
   groups = input<GroupObject[]>();
   // Set of columns in strict order of appearance
-  columns = input<WorkPackageTableColumns>();
+  columns = input<QueryColumn[]>();
 
   // Set of filters
-  filters = input<WorkPackageTableFilters>();
+  filters = input<QueryFilterInstanceResource[]>();
   // Active and available sort by
-  sortBy = input<WorkPackageTableSortBy>();
+  sortBy = input<QuerySortByResource[]>();
   // Active and available group by
-  groupBy = input<WorkPackageTableGroupBy>();
+  groupBy = input<QueryGroupByResource>();
   // is query summed
-  sum = input<WorkPackageTableSum>();
+  sum = input<boolean>();
   // pagination information
   pagination = input<WorkPackageTablePagination>();
   // Table row selection state
@@ -110,7 +110,7 @@ export class TableRenderingStates {
     this.tableState.additionalRequiredWorkPackages
   );
 
-  onQueryUpdated:DerivedState<[WorkPackageResource[], WorkPackageTableColumns, WorkPackageTableSum, WorkPackageTableGroupBy, WorkPackageTableSortBy, null], [undefined], null, undefined> =
+  onQueryUpdated:DerivedState<any,[undefined], null, undefined> =
     derive(this.combinedTableStates, ($,) => $.pipe(mapTo(null)));
 }
 

@@ -28,30 +28,29 @@
 
 import {QueryResource} from 'core-app/modules/hal/resources/query-resource';
 import {QueryGroupByResource} from 'core-app/modules/hal/resources/query-group-by-resource';
-import {WorkPackageTableGroupBy} from '../wp-table-group-by';
 import {WorkPackageQueryStateService, WorkPackageTableBaseService} from './wp-table-base.service';
 import {QueryColumn} from '../../wp-query/query-column';
 import {InputState} from 'reactivestates';
-import {WorkPackageCollectionResource} from 'core-app/modules/hal/resources/wp-collection-resource';
 import {States} from 'core-components/states.service';
 import {TableState} from 'core-components/wp-table/table-state/table-state';
 import {Injectable} from '@angular/core';
-import {WorkPackageTableColumnsService} from 'core-components/wp-fast-table/state/wp-table-columns.service';
 import {cloneHalResource} from 'core-app/modules/hal/helpers/hal-resource-builder';
 
 @Injectable()
-export class WorkPackageTableGroupByService extends WorkPackageTableBaseService<WorkPackageTableGroupBy> implements WorkPackageQueryStateService {
+export class WorkPackageTableGroupByService
+  extends WorkPackageTableBaseService<QueryGroupByResource|undefined>
+  implements WorkPackageQueryStateService {
   public constructor(readonly states:States,
                      readonly tableState:TableState) {
     super(tableState);
   }
 
-  public get state():InputState<WorkPackageTableGroupBy> {
+  protected get inputState():InputState<QueryGroupByResource> {
     return this.tableState.groupBy;
   }
 
   valueFromQuery(query:QueryResource) {
-    return new WorkPackageTableGroupBy(query);
+    return cloneHalResource<QueryGroupByResource>(query.groupBy);
   }
 
   public hasChanged(query:QueryResource) {
@@ -73,22 +72,17 @@ export class WorkPackageTableGroupByService extends WorkPackageTableBaseService<
   }
 
   public set(groupBy:QueryGroupByResource|undefined) {
-    let currentState = this.currentState;
-
-    currentState.current = groupBy;
-
     // hierarchies and group by are mutually exclusive
     if (groupBy) {
-      var hierarchy = this.tableState.hierarchies.value!;
-      hierarchy.current = false;
+      let hierarchy = this.tableState.hierarchies.value!;
+      hierarchy.visible = false;
       this.tableState.hierarchies.putValue(hierarchy);
     }
 
-    this.state.putValue(currentState);
+    this.update(groupBy);
   }
 
   public setBy(column:QueryColumn) {
-    let currentState = this.currentState;
     let groupBy = _.find(this.available, candidate => candidate.id === column.id);
 
     if (groupBy) {
@@ -96,8 +90,8 @@ export class WorkPackageTableGroupByService extends WorkPackageTableBaseService<
     }
   }
 
-  protected get currentState():WorkPackageTableGroupBy {
-    return this.state.value as WorkPackageTableGroupBy;
+  protected get currentState():QueryGroupByResource|undefined {
+    return this.state.value;
   }
 
   protected get availableState() {

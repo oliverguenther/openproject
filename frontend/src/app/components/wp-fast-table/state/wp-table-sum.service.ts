@@ -29,30 +29,24 @@
 import {InputState} from 'reactivestates';
 import {WorkPackageQueryStateService, WorkPackageTableBaseService} from './wp-table-base.service';
 import {QueryResource} from 'core-app/modules/hal/resources/query-resource';
-import {WorkPackageTableSum} from '../wp-table-sum';
 import {TableState} from 'core-components/wp-table/table-state/table-state';
 import {Injectable} from '@angular/core';
 
 @Injectable()
-export class WorkPackageTableSumService extends WorkPackageTableBaseService<WorkPackageTableSum> implements WorkPackageQueryStateService {
+export class WorkPackageTableSumService
+  extends WorkPackageTableBaseService<boolean>
+  implements WorkPackageQueryStateService {
 
   public constructor(tableState:TableState) {
     super(tableState);
   }
 
-
-  public get state():InputState<WorkPackageTableSum> {
-    return this.tableState.sum;
-  }
-
   public valueFromQuery(query:QueryResource) {
-    return new WorkPackageTableSum(query.sums);
+    return !!query.sums;
   }
 
   public initialize(query:QueryResource) {
-    let sum = new WorkPackageTableSum(query.sums);
-
-    this.state.putValue(sum);
+    this.update(!!query.sums);
   }
 
   public hasChanged(query:QueryResource) {
@@ -64,34 +58,27 @@ export class WorkPackageTableSumService extends WorkPackageTableBaseService<Work
     return true;
   }
 
-  public toggle() {
-    let currentState = this.current;
+  public toggle(newValue:boolean|undefined) {
+    if (newValue === undefined) {
+      newValue = !this.current;
+    }
 
-    currentState.toggle();
-
-    this.state.putValue(currentState);
+    this.update(newValue);
   }
 
   public setEnabled(value:boolean) {
-    let currentState = this.current;
-    currentState.current = value;
-
-    this.state.putValue(currentState);
+    this.update(value);
   }
 
   public get isEnabled() {
-    return this.current.isEnabled;
+    return this.current;
   }
 
-  private get current():WorkPackageTableSum {
-    return this.state.value as WorkPackageTableSum;
+  protected get inputState() {
+    return this.tableState.sum;
   }
 
-  public get currentSum():boolean|undefined {
-    if (this.current) {
-      return this.current.current;
-    } else {
-      return undefined;
-    }
+  private get current():boolean {
+    return this.state.getValueOr(false);
   }
 }

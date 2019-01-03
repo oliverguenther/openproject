@@ -33,6 +33,7 @@ import {Observable} from 'rxjs';
 import {QueryResource} from 'core-app/modules/hal/resources/query-resource';
 import {QuerySchemaResource} from 'core-app/modules/hal/resources/query-schema-resource';
 import {WorkPackageCollectionResource} from 'core-app/modules/hal/resources/wp-collection-resource';
+import {QueryFilterInstanceSchemaResource} from 'core-app/modules/hal/resources/query-filter-instance-schema-resource';
 
 export abstract class WorkPackageTableBaseService<T> {
 
@@ -41,9 +42,14 @@ export abstract class WorkPackageTableBaseService<T> {
 
   /**
    * Return the state this service cares for from the table state.
-   * @returns {InputState<T>}
+   *
+   * This state cannot be updated externally.
+   * @returns {State<T>}
    */
-  public abstract get state():InputState<T>;
+  public get state():State<T> {
+    // Cast InputState down for external use.
+    return this.inputState;
+  }
 
   /**
    * Get the state value from the current query.
@@ -57,19 +63,25 @@ export abstract class WorkPackageTableBaseService<T> {
    * Initialize this table state from the given query resource,
    * and possibly the associated schema.
    *
+   * Will only be performed in valueFromQuery is defined.
+   *
    * @param {QueryResource} query
    * @param {QuerySchemaResource} schema
    */
   public initialize(query:QueryResource, results:WorkPackageCollectionResource, schema?:QuerySchemaResource) {
-    this.update(this.valueFromQuery(query, results)!);
+    const initial = this.valueFromQuery(query, results);
+
+    if (initial !== undefined) {
+      this.update(initial);
+    }
   }
 
   public update(value:T) {
-    this.state.putValue(value);
+    this.inputState.putValue(value);
   }
 
   public clear(reason:string) {
-    this.state.clear(reason);
+    this.inputState.clear(reason);
   }
 
   public observeUntil(unsubscribe:Observable<any>) {
@@ -84,6 +96,14 @@ export abstract class WorkPackageTableBaseService<T> {
       )
       .toPromise();
   }
+
+  /**
+   * Return the state this service cares for from the table state.
+   * This state can be internally updated.
+   *
+   * @returns {State<T>}
+   */
+  protected abstract get inputState():InputState<T>;
 }
 
 export interface WorkPackageQueryStateService {

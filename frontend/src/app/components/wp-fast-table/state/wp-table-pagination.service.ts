@@ -33,7 +33,7 @@ import {WorkPackageCollectionResource} from 'core-app/modules/hal/resources/wp-c
 import {TableState} from 'core-components/wp-table/table-state/table-state';
 import {InputState} from 'reactivestates';
 import {WorkPackageTablePagination} from '../wp-table-pagination';
-import {WorkPackageTableBaseService,} from './wp-table-base.service';
+import {WorkPackageTableBaseService} from './wp-table-base.service';
 import {PaginationService} from 'core-components/table-pagination/pagination-service';
 
 export interface PaginationUpdateObject {
@@ -50,7 +50,7 @@ export class WorkPackageTablePaginationService extends WorkPackageTableBaseServi
     super(tableState);
   }
 
-  public get state():InputState<WorkPackageTablePagination> {
+  protected get inputState():InputState<WorkPackageTablePagination> {
     return this.tableState.pagination;
   }
 
@@ -74,19 +74,19 @@ export class WorkPackageTablePaginationService extends WorkPackageTableBaseServi
   }
 
   public updateFromObject(object:PaginationUpdateObject) {
-    let currentState = this.current;
+    this.inputState.doModify(pagination => {
+      if (object.page) {
+        pagination.page = object.page;
+      }
+      if (object.perPage) {
+        pagination.perPage = object.perPage;
+      }
+      if (object.total) {
+        pagination.total = object.total;
+      }
 
-    if (object.page) {
-      currentState.page = object.page;
-    }
-    if (object.perPage) {
-      currentState.perPage = object.perPage;
-    }
-    if (object.total) {
-      currentState.total = object.total;
-    }
-
-    this.state.putValue(currentState);
+      return pagination;
+    });
   }
 
   public updateFromResults(results:WorkPackageCollectionResource) {

@@ -1,16 +1,15 @@
-import {Component, Inject, Injector} from '@angular/core';
+import {Component, Injector} from '@angular/core';
 import {I18nService} from 'core-app/modules/common/i18n/i18n.service';
 import {TabComponent} from 'core-components/wp-table/configuration-modal/tab-portal-outlet';
-import {WorkPackageFiltersService} from 'core-components/filters/wp-filters/wp-filters.service';
 import {WorkPackageTableFiltersService} from 'core-components/wp-fast-table/state/wp-table-filters.service';
-import {WorkPackageTableFilters} from 'core-components/wp-fast-table/wp-table-filters';
+import {QueryFilterInstanceResource} from 'core-app/modules/hal/resources/query-filter-instance-resource';
 
 @Component({
   templateUrl: './filters-tab.component.html'
 })
 export class WpTableConfigurationFiltersTab implements TabComponent {
 
-  public filters:WorkPackageTableFilters|undefined;
+  public filters:QueryFilterInstanceResource[] = [];
   public eeShowBanners:boolean = false;
 
   public text = {
@@ -24,20 +23,19 @@ export class WpTableConfigurationFiltersTab implements TabComponent {
 
   constructor(readonly injector:Injector,
               readonly I18n:I18nService,
-              readonly wpTableFilters:WorkPackageTableFiltersService,
-              readonly wpFiltersService:WorkPackageFiltersService) {
+              readonly wpTableFilters:WorkPackageTableFiltersService) {
   }
 
   ngOnInit() {
     this.eeShowBanners = jQuery('body').hasClass('ee-banners-visible');
     this.wpTableFilters
       .onReady()
-      .then(() => this.filters = this.wpTableFilters.currentState.$copy());
+      .then(() => this.filters = this.wpTableFilters.cloneCurrent());
   }
 
   public onSave() {
     if (this.filters) {
-      this.wpTableFilters.replaceIfComplete(this.filters);
+      this.wpTableFilters.updateIfComplete(this.filters);
     }
   }
 }

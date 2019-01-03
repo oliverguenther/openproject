@@ -38,10 +38,6 @@ export class WorkPackageTableHighlightingService extends WorkPackageTableBaseSer
     return !!_.find(this.current.selectedAttributes, (attr:HalResource) => attr.id === name);
   }
 
-  public get state() {
-    return this.tableState.highlighting;
-  }
-
   public get current():WorkPackageTableHighlight {
     let value = this.state.getValueOr(new WorkPackageTableHighlight('inline'));
     return this.filteredValue(value);
@@ -80,6 +76,10 @@ export class WorkPackageTableHighlightingService extends WorkPackageTableBaseSer
     query.highlightedAttributes = current.selectedAttributes;
 
     return false;
+  }
+
+  protected get inputState() {
+    return this.tableState.highlighting;
   }
 
   private filteredValue(value:WorkPackageTableHighlight):WorkPackageTableHighlight {

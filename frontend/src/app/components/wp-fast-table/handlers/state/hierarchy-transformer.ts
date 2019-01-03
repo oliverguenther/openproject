@@ -5,9 +5,9 @@ import {indicatorCollapsedClass} from '../../builders/modes/hierarchy/single-hie
 import {tableRowClassName} from '../../builders/rows/single-row-builder';
 import {collapsedGroupClass, hierarchyGroupClass, hierarchyRootClass} from '../../helpers/wp-table-hierarchy-helpers';
 import {WorkPackageTable} from '../../wp-fast-table';
-import {WorkPackageTableHierarchies} from '../../wp-table-hierarchies';
 import {WorkPackageTableHierarchiesService} from './../../state/wp-table-hierarchy.service';
 import {TableState} from 'core-components/wp-table/table-state/table-state';
+import {WorkPackageTableHierarchies} from 'core-components/wp-fast-table/state/wp-table-hierarchy.interface';
 
 export class HierarchyTransformer {
 
@@ -20,7 +20,7 @@ export class HierarchyTransformer {
       .values$('Refreshing hierarchies on user request')
       .pipe(
         takeUntil(this.tableState.stopAllSubscriptions),
-        map((state) => state.isEnabled),
+        map((state) => state.visible),
         distinctUntilChanged()
       )
       .subscribe(() => {
@@ -36,11 +36,11 @@ export class HierarchyTransformer {
       .observeUntil(this.tableState.stopAllSubscriptions)
       .subscribe((state:WorkPackageTableHierarchies) => {
 
-        if (state.isEnabled === lastValue) {
+        if (state.visible === lastValue) {
           this.renderHierarchyState(state);
         }
 
-        lastValue = state.isEnabled;
+        lastValue = state.visible;
       });
   }
 

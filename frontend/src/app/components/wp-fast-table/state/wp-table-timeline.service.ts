@@ -32,23 +32,25 @@ import {WorkPackageResource} from 'core-app/modules/hal/resources/work-package-r
 import {TableState} from 'core-components/wp-table/table-state/table-state';
 import {InputState} from 'reactivestates';
 import {zoomLevelOrder} from '../../wp-table/timeline/wp-timeline';
-import {WorkPackageTableTimelineState} from './../wp-table-timeline';
+import {WorkPackageDefaultTimelineLabels, WorkPackageTableTimelineState} from './../wp-table-timeline';
 import {WorkPackageQueryStateService, WorkPackageTableBaseService} from './wp-table-base.service';
 
 @Injectable()
-export class WorkPackageTableTimelineService extends WorkPackageTableBaseService<WorkPackageTableTimelineState> implements WorkPackageQueryStateService {
+export class WorkPackageTableTimelineService
+  extends WorkPackageTableBaseService<WorkPackageTableTimelineState>
+  implements WorkPackageQueryStateService {
 
   public constructor(tableState:TableState) {
     super(tableState);
   }
 
-
-  public get state():InputState<WorkPackageTableTimelineState> {
-    return this.tableState.timeline;
-  }
-
-  public valueFromQuery(query:QueryResource) {
-    return new WorkPackageTableTimelineState(query);
+  public valueFromQuery(query:QueryResource):WorkPackageTableTimelineState {
+    return {
+      autoZoom: false,
+      visible: query.timelineVisible,
+      zoomLevel: query.timelineZoomLevel,
+      labels: query.timelineLabels
+    };
   }
 
   public hasChanged(query:QueryResource) {
@@ -69,18 +71,18 @@ export class WorkPackageTableTimelineService extends WorkPackageTableBaseService
 
   public toggle() {
     let currentState = this.current;
-    this.setVisible(!currentState.isVisible);
+    this.setVisible(!currentState.visible);
   }
 
   public setVisible(value:boolean) {
     let currentState = this.current;
     currentState.visible = value;
 
-    this.state.putValue(currentState);
+    this.update(currentState);
   }
 
   public get isVisible() {
-    return this.current.isVisible;
+    return this.current.visible;
   }
 
   public get zoomLevel() {
@@ -89,20 +91,20 @@ export class WorkPackageTableTimelineService extends WorkPackageTableBaseService
 
   public get labels() {
     if (_.isEmpty(this.current.labels)) {
-      return this.current.defaultLabels;
+      return WorkPackageDefaultTimelineLabels;
     }
 
     return this.current.labels;
   }
 
   public updateLabels(labels:TimelineLabels) {
-    let currentState = this.current;
-    currentState.labels = labels;
-    this.state.putValue(currentState);
+    this.inputState.doModify(current => {
+      return { ...current, labels: labels };
+    });
   }
 
   public getNormalizedLabels(workPackage:WorkPackageResource) {
-    let labels:TimelineLabels = _.clone(this.current.defaultLabels);
+    let labels:TimelineLabels = _.clone(WorkPackageDefaultTimelineLabels);
 
     _.each(this.current.labels, (attribute:string | null, positionAsString:string) => {
       // RR: Lodash typings declare the position as string. However, it is save to cast
@@ -151,5 +153,9 @@ export class WorkPackageTableTimelineService extends WorkPackageTableBaseService
 
   public get current():WorkPackageTableTimelineState {
     return this.state.value as WorkPackageTableTimelineState;
+  }
+
+  public get inputState():InputState<WorkPackageTableTimelineState> {
+    return this.tableState.timeline;
   }
 }

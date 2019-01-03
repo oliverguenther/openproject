@@ -1,4 +1,4 @@
-import {Component, Inject, Injector} from '@angular/core';
+import {Component, Injector} from '@angular/core';
 import {I18nService} from 'core-app/modules/common/i18n/i18n.service';
 import {
   QUERY_SORT_BY_ASC,
@@ -79,7 +79,7 @@ export class WpTableConfigurationSortByTab implements TabComponent {
         // QuerySortByResources are doubled for each column (one for asc/desc direction)
         this.allColumns = _.uniqBy(allColumns, 'href');
 
-        _.each(this.wpTableSortBy.currentSortBys, sort => {
+        _.each(this.wpTableSortBy.current, sort => {
           if (!sort.column.$href!.endsWith('/parent')) {
             this.sortationObjects.push(
               new SortModalObject({name: sort.column.name, href: sort.column.$href},

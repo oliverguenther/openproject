@@ -58,9 +58,9 @@ export class WorkPackagesCalendarController implements OnInit, OnDestroy {
     let startDate = (calendarView.start as Moment).format('YYYY-MM-DD');
     let endDate = (calendarView.end as Moment).format('YYYY-MM-DD');
 
-    if (!this.wpTableFilters.currentState && this.tableState.query.value) {
+    if (!this.wpTableFilters.current && this.tableState.query.value) {
       // nothing to do
-    } else if (!this.wpTableFilters.currentState) {
+    } else if (!this.wpTableFilters.current) {
       let queryProps = this.defaultQueryProps(startDate, endDate);
 
       if (this.$state.params.query_props) {
@@ -70,14 +70,14 @@ export class WorkPackagesCalendarController implements OnInit, OnDestroy {
       this.wpListService.fromQueryParams({ query_props: queryProps }, this.projectIdentifier).toPromise();
     } else {
       let params = this.$state.params;
-      let filtersState = this.wpTableFilters.currentState;
+      let filtersState = this.wpTableFilters.current;
 
-      let datesIntervalFilter = _.find(filtersState.current, {'id': 'datesInterval'}) as any;
+      let datesIntervalFilter = _.find(filtersState, {'id': 'datesInterval'}) as any;
 
       datesIntervalFilter.values[0] = startDate;
       datesIntervalFilter.values[1] = endDate;
 
-      this.wpTableFilters.replace(filtersState);
+      this.wpTableFilters.update(filtersState);
     }
   }
 

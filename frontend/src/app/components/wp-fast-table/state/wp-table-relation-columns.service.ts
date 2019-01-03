@@ -145,7 +145,7 @@ export class WorkPackageTableRelationColumnsService extends WorkPackageTableBase
   }
 
   public relationColumnType(column:QueryColumn):RelationColumnType|null {
-    switch(column._type) {
+    switch (column._type) {
       case queryColumnTypes.RELATION_TO_TYPE:
         return 'toType';
       case queryColumnTypes.RELATION_OF_TYPE:

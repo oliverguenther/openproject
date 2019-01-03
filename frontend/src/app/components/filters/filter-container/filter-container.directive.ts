@@ -28,23 +28,21 @@
 
 import {Component, OnDestroy} from '@angular/core';
 import {WorkPackageTableFiltersService} from 'core-components/wp-fast-table/state/wp-table-filters.service';
-import {WorkPackageTableFilters} from 'core-components/wp-fast-table/wp-table-filters';
 import {componentDestroyed} from 'ng2-rx-componentdestroyed';
-import {WorkPackageFiltersService} from 'core-components/filters/wp-filters/wp-filters.service';
+import {QueryFilterInstanceSchemaResource} from 'core-app/modules/hal/resources/query-filter-instance-schema-resource';
 
 @Component({
   templateUrl: './filter-container.directive.html',
   selector: 'filter-container',
 })
 export class WorkPackageFilterContainerComponent implements OnDestroy {
-  public filters = this.wpTableFilters.currentState;
+  public filters = this.wpTableFilters.current;
 
-  constructor(readonly wpTableFilters:WorkPackageTableFiltersService,
-              readonly wpFiltersService:WorkPackageFiltersService) {
+  constructor(readonly wpTableFilters:WorkPackageTableFiltersService) {
     this.wpTableFilters
       .observeUntil(componentDestroyed(this))
       .subscribe(() => {
-        this.filters = this.wpTableFilters.currentState;
+        this.filters = this.wpTableFilters.current;
     });
   }
 
@@ -52,7 +50,7 @@ export class WorkPackageFilterContainerComponent implements OnDestroy {
     // Nothing to do, added for interface compatibility
   }
 
-  public replaceIfComplete(filters:WorkPackageTableFilters) {
-    this.wpTableFilters.replaceIfComplete(this.filters);
+  public updateIfComplete(filters:QueryFilterInstanceSchemaResource[]) {
+    this.wpTableFilters.updateIfComplete(this.filters);
   }
 }

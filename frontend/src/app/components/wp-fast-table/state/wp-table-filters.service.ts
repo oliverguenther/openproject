@@ -31,34 +31,60 @@ import {Injectable} from '@angular/core';
 import {QueryResource} from 'core-app/modules/hal/resources/query-resource';
 import {QuerySchemaResource} from 'core-app/modules/hal/resources/query-schema-resource';
 import {QueryFilterInstanceResource} from 'core-app/modules/hal/resources/query-filter-instance-resource';
-import {CollectionResource} from 'core-app/modules/hal/resources/collection-resource';
-import {WorkPackageTableFilters} from '../wp-table-filters';
 import {TableState} from 'core-components/wp-table/table-state/table-state';
 import {InputState} from 'reactivestates';
 import {cloneHalResourceCollection} from 'core-app/modules/hal/helpers/hal-resource-builder';
+import {States} from 'core-components/states.service';
+import {QueryFilterResource} from 'core-app/modules/hal/resources/query-filter-resource';
+import {QueryFilterInstanceSchemaResource} from 'core-app/modules/hal/resources/query-filter-instance-schema-resource';
 
 @Injectable()
-export class WorkPackageTableFiltersService extends WorkPackageTableBaseService<WorkPackageTableFilters> implements WorkPackageQueryStateService {
+export class WorkPackageTableFiltersService
+  extends WorkPackageTableBaseService<QueryFilterInstanceResource[]>
+  implements WorkPackageQueryStateService {
 
-  constructor(readonly tableState:TableState) {
+  public readonly hidden:string[] = [
+    'id',
+    'parent',
+    'datesInterval',
+    'precedes',
+    'follows',
+    'relates',
+    'duplicates',
+    'duplicated',
+    'blocks',
+    'blocked',
+    'partof',
+    'includes',
+    'requires',
+    'required',
+  ];
+
+  constructor(readonly tableState:TableState,
+              readonly states:States) {
     super(tableState);
   }
 
-  public get state():InputState<WorkPackageTableFilters> {
+  protected get inputState():InputState<QueryFilterInstanceResource[]> {
     return this.tableState.filters;
   }
 
-  public valueFromQuery(query:QueryResource):WorkPackageTableFilters|undefined {
+  /**
+   * Do not fill initial filter values because we require
+   * the associated schema to be loaded.
+   * @param query
+   */
+  public valueFromQuery(query:QueryResource) {
     return undefined;
   }
 
   public initializeFilters(query:QueryResource, schema:QuerySchemaResource) {
-    let filters = _.map(query.filters, filter => filter.$copy<QueryFilterInstanceResource>());
+    let filters = query.filters.map( filter => filter.$copy<QueryFilterInstanceResource>());
 
     this.loadCurrentFiltersSchemas(filters).then(() => {
-      let newState = new WorkPackageTableFilters(filters, schema.filtersSchemas.elements);
+      // let newState = new WorkPackageTableFilters(filters, schema.filtersSchemas.elements);
 
-      this.state.putValue(newState);
+      this.update(filters);
     });
   }
 
@@ -76,35 +102,75 @@ export class WorkPackageTableFiltersService extends WorkPackageTableBaseService<
     return true;
   }
 
-  public get currentState():WorkPackageTableFilters {
-    return this.state.value as WorkPackageTableFilters;
+  public get current():QueryFilterInstanceResource[] {
+    return this.state.getValueOr([]);
   }
 
-  public get current():QueryFilterInstanceResource[]{
-    if (this.currentState) {
-      return cloneHalResourceCollection<QueryFilterInstanceResource>(this.currentState.current);
-    } else {
-      return [];
+  public cloneCurrent():QueryFilterInstanceResource[] {
+    return cloneHalResourceCollection<QueryFilterInstanceResource>(this.current);
+  }
+
+  public updateIfComplete(newState:QueryFilterInstanceResource[] ) {
+    if (this.isComplete()) {
+      this.update(newState);
     }
   }
 
-  public replace(newState:WorkPackageTableFilters) {
-    this.state.putValue(newState);
+  public add(filter:QueryFilterResource, mapper?:(filter:QueryFilterInstanceResource) => QueryFilterInstanceResource) {
+    let schema = _.find(this.availableSchemas,
+      schema => (schema.filter.allowedValues as QueryFilterResource[])[0].href === filter.href)!;
+
+    mapper = mapper || _.identity;
+    let newFilter = mapper(schema.getFilter());
+
+    this.inputState.doModify((filters) => [...filters, newFilter]);
   }
 
-  public replaceIfComplete(newState:WorkPackageTableFilters) {
-    if (newState.isComplete()) {
-      this.state.putValue(newState);
-    }
+  public remove(filter:QueryFilterInstanceResource) {
+    let index = this.current.indexOf(filter);
+    this.inputState.doModify((value) => value.splice(index, 1));
   }
 
-  public remove(removedFilter:QueryFilterInstanceResource) {
-    this.currentState.remove(removedFilter);
+  public get remainingFilters() {
+    let activeFilterHrefs = this.currentFilters.map(filter => filter.href);
 
-    this.state.putValue(this.currentState);
+    return _.remove(this.availableFilters, filter => activeFilterHrefs.indexOf(filter.href) === -1);
+  }
+
+  public get remainingVisibleFilters() {
+    return this.remainingFilters
+      .filter((filter) => this.hidden.indexOf(filter.id) === -1);
+  }
+
+  public get currentVisibleFilters() {
+    return this.currentFilters
+      .filter((filter) => this.hidden.indexOf(filter.id) === -1);
+  }
+
+  private get currentFilters():QueryFilterResource[] {
+    return this.current.map((filter:QueryFilterInstanceResource) => filter.filter);
+  }
+
+  public get availableFilters() {
+    return this.availableSchemas
+      .map(schema => (schema.filter.allowedValues as QueryFilterResource[])[0]);
+  }
+
+  public isComplete():boolean {
+    return this.current.every( filter => !!filter.isCompletelyDefined());
   }
 
   private loadCurrentFiltersSchemas(filters:QueryFilterInstanceResource[]):Promise<{}> {
-    return Promise.all(filters.map((filter:QueryFilterInstanceResource) => filter.schema.$load()));
+    return Promise.all(filters.map(filter => filter.schema.$load()));
+  }
+
+  // Get available schemas
+  protected get availableSchemas():QueryFilterInstanceSchemaResource[] {
+    return this.schemasState.getValueOr([]);
+  }
+
+  // Get the available state
+  protected get schemasState() {
+    return this.states.queries.filterSchemas;
   }
 }

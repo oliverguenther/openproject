@@ -26,29 +26,33 @@
 // See doc/COPYRIGHT.rdoc for more details.
 // ++
 
-import {WorkPackageQueryStateService, WorkPackageTableBaseService} from './wp-table-base.service';
-import {QueryResource} from 'core-app/modules/hal/resources/query-resource';
-import {WorkPackageTableColumns} from '../wp-table-columns';
 import {QueryColumn, queryColumnTypes} from '../../wp-query/query-column';
 import {InputState} from 'reactivestates';
 import {TableState} from 'core-components/wp-table/table-state/table-state';
 import {States} from 'core-components/states.service';
 import {Injectable} from '@angular/core';
 import {cloneHalResourceCollection} from 'core-app/modules/hal/helpers/hal-resource-builder';
+import {
+  WorkPackageQueryStateService,
+  WorkPackageTableBaseService
+} from 'core-components/wp-fast-table/state/wp-table-base.service';
+import {QueryResource} from 'core-app/modules/hal/resources/query-resource';
 
 @Injectable()
-export class WorkPackageTableColumnsService extends WorkPackageTableBaseService<WorkPackageTableColumns> implements WorkPackageQueryStateService {
+export class WorkPackageTableColumnsService
+  extends WorkPackageTableBaseService<QueryColumn[]>
+  implements WorkPackageQueryStateService {
 
   public constructor(readonly states:States, readonly tableState:TableState) {
     super(tableState);
   }
 
-  public get state():InputState<WorkPackageTableColumns> {
+  protected get inputState():InputState<QueryColumn[]> {
     return this.tableState.columns;
   }
 
-  public valueFromQuery(query:QueryResource):WorkPackageTableColumns {
-    return new WorkPackageTableColumns(query);
+  public valueFromQuery(query:QueryResource):QueryColumn[] {
+    return cloneHalResourceCollection<QueryColumn>(query.columns);
   }
 
   public hasChanged(query:QueryResource) {
@@ -85,8 +89,8 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService<
   /**
    * Retrieve the QueryColumn objects for the selected columns
    */
-  public getColumns():any[] {
-    return (this.currentState && this.currentState.getColumns()) || [];
+  public getColumns():QueryColumn[] {
+    return this.state.getValueOr([]);
   }
 
   /**
@@ -146,20 +150,9 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService<
     return this.index(column.id) === this.columnCount - 1;
   }
 
-  /**
-   * Update the selected columns to a new set of columns.
-   */
-  public setColumns(columns:QueryColumn[]) {
-    let currentState = this.currentState;
-
-    currentState.current = columns;
-
-    this.state.putValue(currentState);
-  }
-
   public setColumnsById(columnIds:string[]) {
     const mapped = columnIds.map(id => _.find(this.all, c => c.id === id));
-    this.setColumns(_.compact(mapped));
+    this.update(_.compact(mapped));
   }
 
   /**
@@ -182,7 +175,7 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService<
     columns.splice(fromIndex, 1);
     columns.splice(toIndex, 0, element);
 
-    this.setColumns(columns);
+    this.update(columns);
   }
 
   /**
@@ -216,7 +209,7 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService<
       }
 
       columns.splice(position, 0, newColumn);
-      this.setColumns(columns);
+      this.update(columns);
     }
   }
 
@@ -229,13 +222,13 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService<
     if (index !== -1) {
       let columns = this.getColumns();
       columns.splice(index, 1);
-      this.setColumns(columns);
+      this.update(columns);
     }
   }
 
   // only exists to cast the state
-  protected get currentState():WorkPackageTableColumns {
-    return this.state.value as WorkPackageTableColumns;
+  protected get currentState():QueryColumn[] {
+    return this.state.value as QueryColumn[];
   }
 
   // Get the available state

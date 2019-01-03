@@ -69,7 +69,7 @@ export class WpTableConfigurationDisplaySettingsTab implements TabComponent {
       this.displayMode = 'grouped';
     }
 
-    this.displaySums = this.wpTableSums.currentSum || false;
+    this.displaySums = this.wpTableSums.isEnabled;
 
     this.wpTableGroupBy
       .onReady()
