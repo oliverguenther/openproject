@@ -6,7 +6,5 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 })
 export class TypeFormAttributeGroupComponent {
   @Input() public group:any;
-  @Input() public eeOnly:boolean = false;
-
-  @Output() public showEEHint = new EventEmitter<void>();
+  @Output() public deleteGroup = new EventEmitter<void>();
 }
